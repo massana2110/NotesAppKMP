@@ -2,6 +2,7 @@ package com.jetbrains.kmpapp.presentation.screens.notes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -28,34 +29,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 
 data object AddNoteScreen : Screen {
 
     private val listColors = listOf(
-        Color.Yellow,
-        Color.Red,
-        Color.Blue,
-        Color.Green,
-        Color.Magenta,
-        Color.Cyan,
-        Color.Gray,
-        Color.Black
+        Pair(Color.Yellow, Color.Black),
+        Pair(Color.Red, Color.White),
+        Pair(Color.Blue, Color.White),
+        Pair(Color.Green, Color.Black),
+        Pair(Color.Magenta, Color.Black),
+        Pair(Color.Cyan, Color.Black),
+        Pair(Color.Gray, Color.Black),
+        Pair(Color.Black, Color.White)
     )
 
     @Composable
     override fun Content() {
         var title by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
-        var colorSelected by remember { mutableStateOf(Color.Yellow) }
+        var colorSelected by remember { mutableStateOf(Pair(Color.Yellow, Color.Black)) }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(colorSelected)
+                    .background(colorSelected.first)
             ) {
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -63,6 +65,7 @@ data object AddNoteScreen : Screen {
                     onValueChange = { title = it },
                     singleLine = true,
                     maxLines = 1,
+                    textStyle = TextStyle(color = colorSelected.second),
                     label = { Text("Titulo") },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
@@ -76,6 +79,7 @@ data object AddNoteScreen : Screen {
                     value = description,
                     onValueChange = { description = it },
                     maxLines = 4,
+                    textStyle = TextStyle(color = colorSelected.second),
                     label = { Text("Descripción") },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
@@ -85,18 +89,19 @@ data object AddNoteScreen : Screen {
                     )
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Subtareas")
 
             Spacer(modifier = Modifier.height(8.dp))
             Text("Selecciona un color")
             Spacer(modifier = Modifier.height(8.dp))
-
-            LazyRow {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(listColors) {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(it)
+                            .background(it.first)
                             .clickable { colorSelected = it },
                         contentAlignment = Alignment.Center
                     ) {
