@@ -5,23 +5,30 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,8 +39,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import com.jetbrains.kmpapp.database.dao.NotesDao
+import com.jetbrains.kmpapp.domain.notes.models.NoteSubtasks
 
-data object AddNoteScreen : Screen {
+data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
 
     private val listColors = listOf(
         Pair(Color.Yellow, Color.Black),
@@ -51,6 +60,11 @@ data object AddNoteScreen : Screen {
         var title by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
         var colorSelected by remember { mutableStateOf(Pair(Color.Yellow, Color.Black)) }
+        val subtasks = remember {
+            mutableStateListOf<NoteSubtasks>(
+                NoteSubtasks(1, false, "Subtask 1")
+            )
+        }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Column(
@@ -91,7 +105,23 @@ data object AddNoteScreen : Screen {
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text("Subtareas")
-
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(subtasks, key = { it.subtaskId }) {
+                    SubtaskItem(
+                        Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        it
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextField(value = "", onValueChange = {})
+                IconButton(onClick = {}) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add subtask")
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text("Selecciona un color")
             Spacer(modifier = Modifier.height(8.dp))
@@ -113,6 +143,23 @@ data object AddNoteScreen : Screen {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    fun SubtaskItem(
+        modifier: Modifier,
+        subtask: NoteSubtasks
+    ) {
+        Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                Checkbox(checked = subtask.subtaskIsDone, onCheckedChange = {})
+                Text(text = subtask.subtaskName)
+            }
+
+            IconButton(onClick = {}) {
+                Icon(imageVector = Icons.Outlined.Clear, contentDescription = "Remove subtask")
             }
         }
     }

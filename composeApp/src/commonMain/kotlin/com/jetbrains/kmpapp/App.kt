@@ -9,16 +9,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.navigator.Navigator
+import com.jetbrains.kmpapp.database.dao.NotesDao
 import com.jetbrains.kmpapp.presentation.components.core.NotesTopAppBar
 import com.jetbrains.kmpapp.presentation.screens.ScreenContentWrapper
 import com.jetbrains.kmpapp.presentation.screens.notes.NotesListScreen
 
 @Composable
-fun App() {
+fun App(notesDao: NotesDao) {
     MaterialTheme {
         var showBackButton by remember { mutableStateOf(false) }
 
-        Navigator(NotesListScreen) {
+        Navigator(NotesListScreen(notesDao)) {
             Scaffold(
                 topBar = {
                     NotesTopAppBar(
@@ -29,7 +30,9 @@ fun App() {
                         onSearchClick = {},
                         onFavoritesClick = {})
                 },
-                content = { ScreenContentWrapper(it) },
+                content = { pv ->
+                    ScreenContentWrapper(pv)
+                          },
             )
 
             LaunchedEffect(it.lastItem) {

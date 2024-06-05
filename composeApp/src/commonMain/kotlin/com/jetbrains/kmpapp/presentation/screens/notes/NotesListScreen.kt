@@ -14,22 +14,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import com.jetbrains.kmpapp.database.dao.NotesDao
 
-data object NotesListScreen: Screen {
+data class NotesListScreen(
+    private val notesDao: NotesDao
+): Screen {
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
+        val notes by notesDao.getAllPeople().collectAsState(initial = emptyList())
 
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    navigator?.push(AddNoteScreen)
+                    navigator?.push(AddNoteScreen(notesDao))
                 }, containerColor = Color.Green) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
                 }

@@ -1,4 +1,4 @@
-package com.jetbrains.kmpapp.data.entities
+package com.jetbrains.kmpapp.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

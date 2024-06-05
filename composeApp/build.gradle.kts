@@ -3,8 +3,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlinxSerialization)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {

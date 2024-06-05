@@ -1,10 +1,10 @@
-package com.jetbrains.kmpapp.data.datasource.database.dao
+package com.jetbrains.kmpapp.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.jetbrains.kmpapp.data.entities.NoteEntity
+import com.jetbrains.kmpapp.database.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
