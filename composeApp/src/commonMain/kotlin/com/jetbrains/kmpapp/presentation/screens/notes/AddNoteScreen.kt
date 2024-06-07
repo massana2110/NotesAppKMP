@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +26,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -37,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import com.jetbrains.kmpapp.database.dao.NotesDao
@@ -55,16 +59,16 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
         Pair(Color.Black, Color.White)
     )
 
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
         var title by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
         var colorSelected by remember { mutableStateOf(Pair(Color.Yellow, Color.Black)) }
         val subtasks = remember {
-            mutableStateListOf<NoteSubtasks>(
-                NoteSubtasks(1, false, "Subtask 1")
-            )
+            mutableStateListOf<NoteSubtasks>()
         }
+        var currentSubtask by remember { mutableStateOf("") }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Column(
@@ -104,7 +108,7 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Subtareas")
+            Text("Subtareas", fontWeight = FontWeight.Bold)
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(subtasks, key = { it.subtaskId }) {
                     SubtaskItem(
@@ -115,15 +119,55 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(value = "", onValueChange = {})
-                IconButton(onClick = {}) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Spacer(Modifier.weight(1f))
+                    TextField(
+                        value = currentSubtask,
+                        onValueChange = { currentSubtask = it },
+                        label = { Text(text = "Subtask") },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent
+                        )
+                    )
+                }
+                IconButton(onClick = {
+                    subtasks.add(
+                        NoteSubtasks(
+                            subtaskId = subtasks.size + 1,
+                            subtaskName = currentSubtask
+                        )
+                    )
+                    currentSubtask = ""
+                }) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add subtask")
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Selecciona un color")
+            Text(text = "Categoria", fontWeight = FontWeight.Bold)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                IconButton(onClick = {}) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add category")
+                }
+                FlowRow {
+                    repeat(6) {
+                        Box(modifier = Modifier.clickable { }) {
+                            Text(
+                                "Category $it",
+                                modifier = Modifier.padding(horizontal = 8.dp, 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Selecciona un color", fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(listColors) {
@@ -142,6 +186,20 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
                             )
                         }
                     }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Due date")
+                    Text(text = "Selected date")
+                }
+
+                TextButton(onClick = {}) {
+                    Text("Delete")
                 }
             }
         }
