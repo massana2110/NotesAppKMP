@@ -3,6 +3,7 @@ package com.jetbrains.kmpapp.database
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.jetbrains.kmpapp.database.dao.CategoriesDao
 import com.jetbrains.kmpapp.database.dao.NotesDao
 import com.jetbrains.kmpapp.database.entities.CategoryEntity
 import com.jetbrains.kmpapp.database.entities.NoteEntity
@@ -20,4 +21,5 @@ abstract class NotesDatabase: RoomDatabase() {
 
     abstract fun getNotesDao(): NotesDao
 
+    abstract fun getCategoriesDao(): CategoriesDao
 }

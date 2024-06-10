@@ -53,6 +53,8 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.koin)
+            implementation(libs.voyager.screen.model)
+            implementation(libs.voyager.transitions)
 
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
