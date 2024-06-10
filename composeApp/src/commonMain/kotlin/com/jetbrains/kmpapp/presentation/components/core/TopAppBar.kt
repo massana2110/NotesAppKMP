@@ -1,9 +1,8 @@
 package com.jetbrains.kmpapp.presentation.components.core
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,8 +17,7 @@ fun NotesTopAppBar(
     modifier: Modifier = Modifier,
     currentTitle: String,
     onBackClick: (() -> Unit)? = null,
-    onSearchClick: () -> Unit,
-    onFavoritesClick: () -> Unit
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
         modifier = modifier,
@@ -34,13 +32,6 @@ fun NotesTopAppBar(
             }
         },
         title = { Text(text = currentTitle) },
-        actions = {
-            IconButton(onClick = { onSearchClick() }) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
-            }
-            IconButton(onClick = { onFavoritesClick() }) {
-                Icon(imageVector = Icons.Default.Star, contentDescription = "Favorites")
-            }
-        }
+        actions = actions
     )
 }

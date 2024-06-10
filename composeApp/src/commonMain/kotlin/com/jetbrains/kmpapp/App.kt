@@ -1,5 +1,6 @@
 package com.jetbrains.kmpapp
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,8 +19,13 @@ import com.jetbrains.kmpapp.presentation.screens.notes.NotesListScreen
 fun App(notesDao: NotesDao) {
     MaterialTheme {
         var showBackButton by remember { mutableStateOf(false) }
+        var topBarActions by remember { mutableStateOf<@Composable RowScope.() -> Unit>({}) }
 
-        Navigator(NotesListScreen(notesDao)) {
+        Navigator(
+            NotesListScreen(
+                notesDao = notesDao,
+                onActionsChange = { actions -> topBarActions = actions })
+        ) {
             Scaffold(
                 topBar = {
                     NotesTopAppBar(
@@ -27,12 +33,12 @@ fun App(notesDao: NotesDao) {
                         onBackClick = if (showBackButton) {
                             { it.pop() }
                         } else null,
-                        onSearchClick = {},
-                        onFavoritesClick = {})
+                        actions = topBarActions
+                    )
                 },
                 content = { pv ->
                     ScreenContentWrapper(pv)
-                          },
+                },
             )
 
             LaunchedEffect(it.lastItem) {

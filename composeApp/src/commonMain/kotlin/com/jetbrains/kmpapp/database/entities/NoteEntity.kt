@@ -9,5 +9,7 @@ data class NoteEntity(
     val title: String,
     val content: String,
     val category: Int,
+    val color: Long,
     val isFavorite: Boolean,
+    val createdAt: String,
 )

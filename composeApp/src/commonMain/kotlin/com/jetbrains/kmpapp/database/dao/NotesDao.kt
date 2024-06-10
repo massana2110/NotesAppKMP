@@ -17,5 +17,5 @@ interface NotesDao {
     suspend fun delete(note: NoteEntity)
 
     @Query("SELECT * FROM notes_table")
-    fun getAllPeople(): Flow<List<NoteEntity>>
+    fun getAllNotes(): Flow<List<NoteEntity>>
 }

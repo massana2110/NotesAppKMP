@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,14 +27,15 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,19 +46,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import com.jetbrains.kmpapp.database.dao.NotesDao
-import com.jetbrains.kmpapp.domain.notes.models.NoteSubtasks
+import com.jetbrains.kmpapp.database.entities.NoteEntity
+import com.jetbrains.kmpapp.domain.notes.models.SubtaskModel
+import com.jetbrains.kmpapp.presentation.DeepSkyBlue
+import com.jetbrains.kmpapp.presentation.DimGray
+import com.jetbrains.kmpapp.presentation.GoldenYellow
+import com.jetbrains.kmpapp.presentation.IndianRed
+import com.jetbrains.kmpapp.presentation.MediumSeaGreen
+import com.jetbrains.kmpapp.presentation.MediumTurquoise
+import com.jetbrains.kmpapp.presentation.Purple
 
-data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
+data class AddNoteScreen(
+    private val notesDao: NotesDao,
+    private val onActionsChange: (@Composable RowScope.() -> Unit) -> Unit
+) : Screen {
 
     private val listColors = listOf(
-        Pair(Color.Yellow, Color.Black),
-        Pair(Color.Red, Color.White),
-        Pair(Color.Blue, Color.White),
-        Pair(Color.Green, Color.Black),
-        Pair(Color.Magenta, Color.Black),
-        Pair(Color.Cyan, Color.Black),
-        Pair(Color.Gray, Color.Black),
-        Pair(Color.Black, Color.White)
+        Pair(GoldenYellow, Color.Black),
+        Pair(IndianRed, Color.White),
+        Pair(DeepSkyBlue, Color.Black),
+        Pair(Purple, Color.White),
+        Pair(MediumSeaGreen, Color.Black),
+        Pair(DimGray, Color.Black),
+        Pair(MediumTurquoise, Color.White)
     )
 
     @OptIn(ExperimentalLayoutApi::class)
@@ -64,11 +76,20 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
     override fun Content() {
         var title by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
-        var colorSelected by remember { mutableStateOf(Pair(Color.Yellow, Color.Black)) }
-        val subtasks = remember {
-            mutableStateListOf<NoteSubtasks>()
-        }
+        var colorSelected by remember { mutableStateOf(listColors.first()) }
+        val subtasks = remember { mutableStateListOf<SubtaskModel>() }
         var currentSubtask by remember { mutableStateOf("") }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(Unit) {
+            onActionsChange {
+                IconButton(onClick = {
+                    /* TODO: On save note using use cases */
+                }) {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = "Save note")
+                }
+            }
+        }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
             Column(
@@ -110,7 +131,7 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
             Spacer(modifier = Modifier.height(8.dp))
             Text("Subtareas", fontWeight = FontWeight.Bold)
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(subtasks, key = { it.subtaskId }) {
+                items(subtasks, key = { it.id }) {
                     SubtaskItem(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         it
@@ -139,9 +160,10 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
                 }
                 IconButton(onClick = {
                     subtasks.add(
-                        NoteSubtasks(
-                            subtaskId = subtasks.size + 1,
-                            subtaskName = currentSubtask
+                        SubtaskModel(
+                            id = subtasks.size + 1,
+                            subtaskName = currentSubtask,
+                            isCompleted = false
                         )
                     )
                     currentSubtask = ""
@@ -188,31 +210,17 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Due date")
-                    Text(text = "Selected date")
-                }
-
-                TextButton(onClick = {}) {
-                    Text("Delete")
-                }
-            }
         }
     }
 
     @Composable
     fun SubtaskItem(
         modifier: Modifier,
-        subtask: NoteSubtasks
+        subtask: SubtaskModel
     ) {
         Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Checkbox(checked = subtask.subtaskIsDone, onCheckedChange = {})
+                Checkbox(checked = subtask.isCompleted, onCheckedChange = {})
                 Text(text = subtask.subtaskName)
             }
 
@@ -220,5 +228,9 @@ data class AddNoteScreen(private val notesDao: NotesDao) : Screen {
                 Icon(imageVector = Icons.Outlined.Clear, contentDescription = "Remove subtask")
             }
         }
+    }
+
+    private suspend fun onSaveNote(noteEntity: NoteEntity) {
+        notesDao.upsert(noteEntity)
     }
 }
