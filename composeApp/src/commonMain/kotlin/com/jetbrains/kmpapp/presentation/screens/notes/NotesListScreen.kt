@@ -20,24 +20,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
-import com.jetbrains.kmpapp.database.dao.NotesDao
+import com.jetbrains.kmpapp.presentation.viewmodels.notes.NotesListViewModel
 
 data class NotesListScreen(
-    private val notesDao: NotesDao,
     private val onActionsChange: (@Composable RowScope.() -> Unit) -> Unit
 ) : Screen {
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
-        val notes by notesDao.getAllNotes().collectAsState(initial = emptyList())
+        val viewModel = getScreenModel<NotesListViewModel>()
+        // val notes by notesDao.getAllNotes().collectAsState(initial = emptyList())
 
         LaunchedEffect(Unit) {
             onActionsChange {
@@ -53,7 +52,7 @@ data class NotesListScreen(
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    navigator?.push(AddNoteScreen(notesDao, onActionsChange = { actions ->
+                    navigator?.push(AddNoteScreen(onActionsChange = { actions ->
                         onActionsChange(actions)
                     }))
                 }, containerColor = Color.Green) {
@@ -67,12 +66,12 @@ data class NotesListScreen(
                 verticalItemSpacing = 4.dp,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                items(notes) {
+                items(viewModel.myNotesList.toList()) {
                     Card(
                         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                         colors = CardDefaults.cardColors(containerColor = Color.Yellow)
                     ) {
-                        Text(text = "Ejemplo de nota")
+                        Text(text = it)
                     }
                 }
             }

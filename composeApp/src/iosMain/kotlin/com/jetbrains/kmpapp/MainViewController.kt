@@ -1,12 +1,14 @@
 package com.jetbrains.kmpapp
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
-import com.jetbrains.kmpapp.database.getNotesDatabase
+import com.jetbrains.kmpapp.di.commonModule
+import com.jetbrains.kmpapp.di.iOSModule
+import org.koin.core.context.startKoin
 
 fun MainViewController() = ComposeUIViewController {
-    val dao = remember {
-        getNotesDatabase().getNotesDao()
-    }
-    App(dao)
+    App()
+}
+
+fun initKoin() = startKoin {
+    modules(commonModule, iOSModule)
 }

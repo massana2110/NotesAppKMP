@@ -45,7 +45,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
-import com.jetbrains.kmpapp.database.dao.NotesDao
 import com.jetbrains.kmpapp.database.entities.NoteEntity
 import com.jetbrains.kmpapp.domain.notes.models.SubtaskModel
 import com.jetbrains.kmpapp.presentation.DeepSkyBlue
@@ -57,7 +56,7 @@ import com.jetbrains.kmpapp.presentation.MediumTurquoise
 import com.jetbrains.kmpapp.presentation.Purple
 
 data class AddNoteScreen(
-    private val notesDao: NotesDao,
+    /*private val notesDao: NotesDao, */
     private val onActionsChange: (@Composable RowScope.() -> Unit) -> Unit
 ) : Screen {
 
@@ -231,6 +230,6 @@ data class AddNoteScreen(
     }
 
     private suspend fun onSaveNote(noteEntity: NoteEntity) {
-        notesDao.upsert(noteEntity)
+
     }
 }

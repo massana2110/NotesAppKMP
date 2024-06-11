@@ -1,5 +1,6 @@
 package com.jetbrains.kmpapp.database.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,7 +10,7 @@ data class NoteEntity(
     val title: String,
     val content: String,
     val category: Int,
-    val color: Long,
+    @ColumnInfo(defaultValue = "0") val color: Long,
     val isFavorite: Boolean,
-    val createdAt: String,
+    @ColumnInfo(defaultValue = "") val createdAt: String,
 )
