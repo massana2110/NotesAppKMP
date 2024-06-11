@@ -31,12 +31,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,45 +41,26 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import com.jetbrains.kmpapp.database.entities.NoteEntity
 import com.jetbrains.kmpapp.domain.notes.models.SubtaskModel
-import com.jetbrains.kmpapp.presentation.DeepSkyBlue
-import com.jetbrains.kmpapp.presentation.DimGray
-import com.jetbrains.kmpapp.presentation.GoldenYellow
-import com.jetbrains.kmpapp.presentation.IndianRed
-import com.jetbrains.kmpapp.presentation.MediumSeaGreen
-import com.jetbrains.kmpapp.presentation.MediumTurquoise
-import com.jetbrains.kmpapp.presentation.Purple
+import com.jetbrains.kmpapp.presentation.viewmodels.notes.AddNoteViewModel
+import com.jetbrains.kmpapp.presentation.viewmodels.notes.listColors
 
 data class AddNoteScreen(
-    /*private val notesDao: NotesDao, */
     private val onActionsChange: (@Composable RowScope.() -> Unit) -> Unit
 ) : Screen {
-
-    private val listColors = listOf(
-        Pair(GoldenYellow, Color.Black),
-        Pair(IndianRed, Color.White),
-        Pair(DeepSkyBlue, Color.Black),
-        Pair(Purple, Color.White),
-        Pair(MediumSeaGreen, Color.Black),
-        Pair(DimGray, Color.Black),
-        Pair(MediumTurquoise, Color.White)
-    )
 
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
     override fun Content() {
-        var title by remember { mutableStateOf("") }
-        var description by remember { mutableStateOf("") }
-        var colorSelected by remember { mutableStateOf(listColors.first()) }
-        val subtasks = remember { mutableStateListOf<SubtaskModel>() }
-        var currentSubtask by remember { mutableStateOf("") }
-        val coroutineScope = rememberCoroutineScope()
+        val addNoteViewModel = getScreenModel<AddNoteViewModel>()
+        val uiState by addNoteViewModel.uiState.collectAsState()
 
         LaunchedEffect(Unit) {
             onActionsChange {
                 IconButton(onClick = {
-                    /* TODO: On save note using use cases */
+                    addNoteViewModel.saveNote()
                 }) {
                     Icon(imageVector = Icons.Default.Check, contentDescription = "Save note")
                 }
@@ -95,15 +72,15 @@ data class AddNoteScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(colorSelected.first)
+                    .background(uiState.colorSelected.first)
             ) {
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = title,
-                    onValueChange = { title = it },
+                    value = uiState.title,
+                    onValueChange = { addNoteViewModel.onNoteTitleChange(it) },
                     singleLine = true,
                     maxLines = 1,
-                    textStyle = TextStyle(color = colorSelected.second),
+                    textStyle = TextStyle(color = uiState.colorSelected.second),
                     label = { Text("Titulo") },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
@@ -114,10 +91,10 @@ data class AddNoteScreen(
                 )
                 TextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = description,
-                    onValueChange = { description = it },
+                    value = uiState.description,
+                    onValueChange = { addNoteViewModel.onNoteDescriptionChange(it) },
                     maxLines = 4,
-                    textStyle = TextStyle(color = colorSelected.second),
+                    textStyle = TextStyle(color = uiState.colorSelected.second),
                     label = { Text("Descripción") },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
@@ -130,7 +107,7 @@ data class AddNoteScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Text("Subtareas", fontWeight = FontWeight.Bold)
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(subtasks, key = { it.id }) {
+                items(uiState.subtasks, key = { it.id }) {
                     SubtaskItem(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         it
@@ -148,8 +125,8 @@ data class AddNoteScreen(
                 ) {
                     Spacer(Modifier.weight(1f))
                     TextField(
-                        value = currentSubtask,
-                        onValueChange = { currentSubtask = it },
+                        value = uiState.currentSubtask,
+                        onValueChange = { addNoteViewModel.onNoteSubtaskChange(it) },
                         label = { Text(text = "Subtask") },
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
@@ -158,14 +135,7 @@ data class AddNoteScreen(
                     )
                 }
                 IconButton(onClick = {
-                    subtasks.add(
-                        SubtaskModel(
-                            id = subtasks.size + 1,
-                            subtaskName = currentSubtask,
-                            isCompleted = false
-                        )
-                    )
-                    currentSubtask = ""
+                    addNoteViewModel.onSubtaskAdded()
                 }) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add subtask")
                 }
@@ -197,10 +167,10 @@ data class AddNoteScreen(
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(it.first)
-                            .clickable { colorSelected = it },
+                            .clickable { addNoteViewModel.onColorSelectedChange(it) },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (colorSelected == it) {
+                        if (uiState.colorSelected == it) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = it.toString()
