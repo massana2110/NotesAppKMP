@@ -12,8 +12,4 @@ class GetAllNotesUseCase(
         }
     }*/
 
-    operator fun invoke(): List<String> {
-        return listOf("Nota 1", "Nota 2")
-    }
-
 }

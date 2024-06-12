@@ -13,4 +13,5 @@ val androidModule = module {
     // Provides the DAOs
     single { get<NotesDatabase>().getNotesDao()}
     single { get<NotesDatabase>().getCategoriesDao()}
+    single { get<NotesDatabase>().getSubtasksDao() }
 }

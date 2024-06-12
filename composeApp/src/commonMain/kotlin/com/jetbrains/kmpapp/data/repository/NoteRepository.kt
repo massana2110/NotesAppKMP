@@ -2,12 +2,15 @@ package com.jetbrains.kmpapp.data.repository
 
 import com.jetbrains.kmpapp.database.dao.CategoriesDao
 import com.jetbrains.kmpapp.database.dao.NotesDao
+import com.jetbrains.kmpapp.database.dao.SubtaskDao
 import com.jetbrains.kmpapp.database.entities.CategoryEntity
 import com.jetbrains.kmpapp.database.entities.NoteEntity
+import com.jetbrains.kmpapp.database.entities.SubtaskEntity
 
 class NoteRepository(
     private val notesDao: NotesDao,
-    private val categoriesDao: CategoriesDao
+    private val categoriesDao: CategoriesDao,
+    private val subtaskDao: SubtaskDao
 ) {
 
     // GET Operations
@@ -16,11 +19,23 @@ class NoteRepository(
     fun getAllCategoriesFromDb() = categoriesDao.getAllCategories()
 
     // INSERT Operations
-    suspend fun saveNote(noteEntity: NoteEntity) {
-        notesDao.upsert(noteEntity)
+    suspend fun saveCategory(categoryEntity: CategoryEntity): Result<Unit> {
+        return try {
+            categoriesDao.upsertCategory(categoryEntity)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    suspend fun saveCategory(categoryEntity: CategoryEntity) {
-        categoriesDao.upsertCategory(categoryEntity)
+    suspend fun insertNoteWithSubtasks(note: NoteEntity, subtasks: List<SubtaskEntity>): Result<Unit> {
+        return try {
+            val noteId = notesDao.insertNote(note)
+            val updatedSubtasks = subtasks.map { it.copy(noteId = noteId.toInt()) }
+            if (updatedSubtasks.isNotEmpty()) subtaskDao.insertAll(updatedSubtasks)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

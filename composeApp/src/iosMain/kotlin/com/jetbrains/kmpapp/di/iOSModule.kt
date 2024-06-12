@@ -10,4 +10,5 @@ val iOSModule = module {
     // Provides DAOs
     single { get<NotesDatabase>().getNotesDao() }
     single { get<NotesDatabase>().getCategoriesDao() }
+    single { get<NotesDatabase>().getSubtasksDao() }
 }

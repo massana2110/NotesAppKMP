@@ -6,6 +6,7 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.jetbrains.kmpapp.domain.categories.GetCategoriesUseCase
 import com.jetbrains.kmpapp.domain.categories.SaveCategoryUseCase
 import com.jetbrains.kmpapp.domain.notes.models.CategoryModel
+import com.jetbrains.kmpapp.domain.notes.models.NoteModel
 import com.jetbrains.kmpapp.domain.notes.models.SubtaskModel
 import com.jetbrains.kmpapp.domain.notes.usecases.UpsertNoteUseCase
 import com.jetbrains.kmpapp.presentation.components.notes.listColors
@@ -24,6 +25,8 @@ data class AddNoteUiState(
     val subtasks: List<SubtaskModel> = emptyList(),
     val categories: List<CategoryModel> = emptyList(),
     val currentSubtask: String = "",
+    val categoryIsSaved: Boolean = false,
+    val noteIsSaved: Boolean = false
 )
 
 class AddNoteViewModel(
@@ -69,8 +72,28 @@ class AddNoteViewModel(
         }
     }
 
+    fun markSubtaskCompleted(id: Int, isCompleted: Boolean) {
+        _uiState.update { state ->
+            val updatedSubtasks = state.subtasks.map {
+                if (it.id == id) it.copy(isCompleted = isCompleted) else it
+            }
+            state.copy(subtasks = updatedSubtasks)
+        }
+    }
+
+    fun removeSubtask(id: Int) {
+        _uiState.update { state ->
+            val updatedSubtasks = state.subtasks.filterNot { it.id == id }
+            state.copy(subtasks = updatedSubtasks)
+        }
+    }
+
     fun onColorSelectedChange(colorSelected: Pair<Color, Color>) {
         _uiState.update { it.copy(colorSelected = colorSelected) }
+    }
+
+    fun resetCategorySaved() {
+        _uiState.update { it.copy(categoryIsSaved = false) }
     }
 
     private fun loadCategories() {
@@ -82,9 +105,40 @@ class AddNoteViewModel(
     }
 
     fun saveCategory(category: CategoryModel) {
-        screenModelScope.launch { saveCategoryUseCase(category) }
+        screenModelScope.launch {
+            val result = saveCategoryUseCase(category)
+            result.onSuccess {
+                _uiState.update { it.copy(categoryIsSaved = true) }
+            }.onFailure {
+                println("Failure on saveCategory: ${it.message}")
+            }
+        }
     }
 
-    fun saveNote() {}
+    fun saveNote() {
+        screenModelScope.launch {
+            val result = upsertNoteUseCase(
+                noteModel = NoteModel(
+                    noteId = 0,
+                    category = CategoryModel(
+                        id = _uiState.value.categoryIdSelected,
+                        categoryName = "",
+                        categoryColor = Color.Transparent
+                    ),
+                    title = _uiState.value.title,
+                    content = _uiState.value.description,
+                    color = _uiState.value.colorSelected.first,
+                    isFavorite = false,
+                    subtasks = _uiState.value.subtasks
+                )
+            )
+
+            result.onSuccess {
+
+            }.onFailure {
+                
+            }
+        }
+    }
 
 }

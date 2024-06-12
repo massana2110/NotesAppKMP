@@ -8,7 +8,7 @@ class SaveCategoryUseCase(
     private val noteRepository: NoteRepository
 ) {
 
-    suspend operator fun invoke(categoryModel: CategoryModel) {
+    suspend operator fun invoke(categoryModel: CategoryModel) =
         noteRepository.saveCategory(categoryModel.toEntity())
-    }
+
 }

@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
@@ -78,9 +79,15 @@ data class AddNoteScreen(
                     addNoteViewModel.saveCategory(
                         CategoryModel(0, categoryName, color)
                     )
-                    showCategoryDialog = false
                 }
             )
+        }
+
+        LaunchedEffect(uiState.categoryIsSaved) {
+            if (uiState.categoryIsSaved) {
+                showCategoryDialog = false
+                addNoteViewModel.resetCategorySaved()
+            }
         }
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -126,7 +133,13 @@ data class AddNoteScreen(
                 items(uiState.subtasks, key = { it.id }) {
                     SubtaskItem(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        it
+                        it,
+                        onCompletedChange = { id, isCompleted ->
+                            addNoteViewModel.markSubtaskCompleted(id, isCompleted)
+                        },
+                        onRemove = { id ->
+                            addNoteViewModel.removeSubtask(id)
+                        }
                     )
                 }
             }
@@ -206,15 +219,23 @@ data class AddNoteScreen(
     @Composable
     fun SubtaskItem(
         modifier: Modifier,
-        subtask: SubtaskModel
+        subtask: SubtaskModel,
+        onCompletedChange: (Int, Boolean) -> Unit,
+        onRemove: (Int) -> Unit
     ) {
         Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Checkbox(checked = subtask.isCompleted, onCheckedChange = {})
-                Text(text = subtask.subtaskName)
+                Checkbox(
+                    checked = subtask.isCompleted,
+                    onCheckedChange = { onCompletedChange(subtask.id, it) }
+                )
+                Text(
+                    text = subtask.subtaskName,
+                    textDecoration = if (subtask.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                )
             }
 
-            IconButton(onClick = {}) {
+            IconButton(onClick = { onRemove(subtask.id) }) {
                 Icon(imageVector = Icons.Outlined.Clear, contentDescription = "Remove subtask")
             }
         }

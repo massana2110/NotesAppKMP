@@ -48,3 +48,9 @@ fun CategoryModel.toEntity() = CategoryEntity(
     categoryName = categoryName,
     categoryColor = categoryColor.value.toLong()
 )
+
+fun SubtaskModel.toEntity() = SubtaskEntity(
+    noteId = id,
+    subtaskName = subtaskName,
+    isCompleted = isCompleted
+)
