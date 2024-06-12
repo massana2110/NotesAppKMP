@@ -1,5 +1,6 @@
 package com.jetbrains.kmpapp.database.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -7,5 +8,5 @@ import androidx.room.PrimaryKey
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val categoryName: String,
-    val categoryColor: String
+    @ColumnInfo(defaultValue = "0") val categoryColor: Long
 )

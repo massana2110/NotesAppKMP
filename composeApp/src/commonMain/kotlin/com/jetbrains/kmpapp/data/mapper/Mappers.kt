@@ -39,5 +39,12 @@ fun SubtaskEntity.toDomain() = SubtaskModel(
 )
 
 fun CategoryEntity.toDomain() = CategoryModel(
-    id = id
+    id = id,
+    categoryName = categoryName,
+    categoryColor = Color(categoryColor.toULong())
+)
+
+fun CategoryModel.toEntity() = CategoryEntity(
+    categoryName = categoryName,
+    categoryColor = categoryColor.value.toLong()
 )

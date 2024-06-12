@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import com.jetbrains.kmpapp.database.entities.CategoryEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoriesDao {
@@ -16,6 +17,6 @@ interface CategoriesDao {
     suspend fun removeCategory(categoryEntity: CategoryEntity)
 
     @Query("SELECT * FROM categories_table")
-    suspend fun getAllCategories(): List<CategoryEntity>
+    fun getAllCategories(): Flow<List<CategoryEntity>>
 
 }
