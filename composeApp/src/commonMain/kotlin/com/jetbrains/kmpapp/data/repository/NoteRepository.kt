@@ -18,6 +18,12 @@ class NoteRepository(
 
     fun getAllCategoriesFromDb() = categoriesDao.getAllCategories()
 
+    suspend fun getCategoryForNote(categoryId: Int) = categoriesDao.getCategoryForNote(categoryId)
+
+    fun getSubtasksFlowForNote(noteId: Int) = subtaskDao.getSubtasksForNote(noteId)
+
+    suspend fun getSubtasksListForNote(noteId: Int) = subtaskDao.getSubtasksListForNote(noteId)
+
     // INSERT Operations
     suspend fun saveCategory(categoryEntity: CategoryEntity): Result<Unit> {
         return try {

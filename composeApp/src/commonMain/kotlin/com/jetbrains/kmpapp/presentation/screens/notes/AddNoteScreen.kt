@@ -22,7 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -43,8 +46,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
 import com.jetbrains.kmpapp.domain.notes.models.CategoryModel
 import com.jetbrains.kmpapp.domain.notes.models.SubtaskModel
 import com.jetbrains.kmpapp.presentation.components.notes.AddCategoryModal
@@ -55,12 +61,13 @@ data class AddNoteScreen(
     private val onActionsChange: (@Composable RowScope.() -> Unit) -> Unit
 ) : Screen {
 
-    @OptIn(ExperimentalLayoutApi::class)
+    @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val addNoteViewModel = getScreenModel<AddNoteViewModel>()
         val uiState by addNoteViewModel.uiState.collectAsState()
         var showCategoryDialog by remember { mutableStateOf(false) }
+        val localNavigator = LocalNavigator.current
 
         LaunchedEffect(Unit) {
             onActionsChange {
@@ -81,6 +88,37 @@ data class AddNoteScreen(
                     )
                 }
             )
+        }
+
+        AnimatedVisibility(uiState.noteIsSaved) {
+            Dialog(onDismissRequest = {}) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Information",
+                        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 24.dp),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Note saved successfully",
+                        modifier = Modifier.padding(start = 12.dp, end = 12.dp),
+                        fontSize = 14.sp,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                        Button(onClick = { localNavigator?.pop() }) {
+                            Text("Go back")
+                        }
+                    }
+                }
+            }
         }
 
         LaunchedEffect(uiState.categoryIsSaved) {

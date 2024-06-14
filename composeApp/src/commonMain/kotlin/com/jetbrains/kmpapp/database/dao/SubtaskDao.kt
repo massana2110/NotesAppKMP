@@ -12,6 +12,9 @@ interface SubtaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(subtasks: List<SubtaskEntity>)
 
-    @Query("SELECT * FROM subtasks WHERE noteId = :noteId")
+    @Query("SELECT * FROM subtasks_table WHERE noteId = :noteId")
     fun getSubtasksForNote(noteId: Int): Flow<List<SubtaskEntity>>
+
+    @Query("SELECT * FROM subtasks_table WHERE noteId = :noteId")
+    suspend fun getSubtasksListForNote(noteId: Int): List<SubtaskEntity>
 }

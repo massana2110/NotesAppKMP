@@ -12,7 +12,7 @@ import org.koin.dsl.module
 val commonModule = module {
 
     // Repositories
-    single { NoteRepository(notesDao = get(), categoriesDao = get()) }
+    single { NoteRepository(notesDao = get(), categoriesDao = get(), subtaskDao = get()) }
 
     // Use cases
     factory { GetAllNotesUseCase(get()) }

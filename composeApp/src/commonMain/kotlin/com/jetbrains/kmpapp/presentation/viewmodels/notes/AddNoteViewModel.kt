@@ -134,9 +134,9 @@ class AddNoteViewModel(
             )
 
             result.onSuccess {
-
+                _uiState.update { it.copy(noteIsSaved = true) }
             }.onFailure {
-                
+                println("Failure on saveNote: ${it.message}")
             }
         }
     }
