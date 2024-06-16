@@ -26,7 +26,8 @@ data class AddNoteUiState(
     val categories: List<CategoryModel> = emptyList(),
     val currentSubtask: String = "",
     val categoryIsSaved: Boolean = false,
-    val noteIsSaved: Boolean = false
+    val noteIsSaved: Boolean = false,
+    val noteIsFavorite: Boolean = false
 )
 
 class AddNoteViewModel(
@@ -128,7 +129,7 @@ class AddNoteViewModel(
                     title = _uiState.value.title,
                     content = _uiState.value.description,
                     color = _uiState.value.colorSelected.first,
-                    isFavorite = false,
+                    isFavorite = _uiState.value.noteIsFavorite,
                     subtasks = _uiState.value.subtasks
                 )
             )
@@ -139,6 +140,10 @@ class AddNoteViewModel(
                 println("Failure on saveNote: ${it.message}")
             }
         }
+    }
+
+    fun toggleNoteAsFavorite() {
+        _uiState.update { it.copy(noteIsFavorite = !it.noteIsFavorite) }
     }
 
 }

@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +44,7 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import com.jetbrains.kmpapp.domain.notes.models.NoteModel
 import com.jetbrains.kmpapp.domain.utils.DateTimeUtil
+import com.jetbrains.kmpapp.presentation.MediumSeaGreen
 import com.jetbrains.kmpapp.presentation.viewmodels.notes.NotesListViewModel
 
 data class NotesListScreen(
@@ -52,27 +56,33 @@ data class NotesListScreen(
         val navigator = LocalNavigator.current
         val viewModel = getScreenModel<NotesListViewModel>()
         val uiState by viewModel.uiState.collectAsState()
-        // val notes by notesDao.getAllNotes().collectAsState(initial = emptyList())
 
         LaunchedEffect(Unit) {
             onActionsChange {
                 IconButton(onClick = { }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
                 }
-                IconButton(onClick = { }) {
-                    Icon(imageVector = Icons.Default.Star, contentDescription = "Favorites")
-                }
             }
         }
 
         Scaffold(
             floatingActionButton = {
-                FloatingActionButton(onClick = {
-                    navigator?.push(AddNoteScreen(onActionsChange = { actions ->
-                        onActionsChange(actions)
-                    }))
-                }, containerColor = Color.Green) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+                FloatingActionButton(
+                    onClick = {
+                        navigator?.push(
+                            AddNoteScreen(onActionsChange = { actions ->
+                                onActionsChange(actions)
+                            })
+                        )
+                    },
+                    containerColor = MediumSeaGreen,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add note",
+                        tint = Color.White
+                    )
                 }
             }
         ) {
@@ -83,7 +93,7 @@ data class NotesListScreen(
                 verticalItemSpacing = 8.dp,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(uiState.notesList) { note ->
+                items(uiState.notesList, key = { item -> item.noteId }) { note ->
                     NoteItem(note = note)
                 }
             }
@@ -96,18 +106,19 @@ data class NotesListScreen(
             modifier = modifier.fillMaxWidth().wrapContentHeight(),
             colors = CardDefaults.cardColors(containerColor = note.color),
             shape = RoundedCornerShape(
-                topStart = 8.dp,
+                topStart = 16.dp,
                 topEnd = 0.dp,
-                bottomStart = 8.dp,
-                bottomEnd = 8.dp
+                bottomStart = 16.dp,
+                bottomEnd = 16.dp
             )
         ) {
             val displayedItems =
                 if (note.subtasks.size > 3) note.subtasks.take(3) else note.subtasks
 
-            Row(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 8.dp, end = 8.dp)) {
                 if (note.isFavorite) {
                     Icon(
+                        modifier = Modifier.size(16.dp),
                         imageVector = Icons.Default.Star,
                         contentDescription = "Favorite",
                         tint = Color.Yellow
@@ -122,34 +133,51 @@ data class NotesListScreen(
                 )
             }
             Text(
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
                 text = note.title,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White
             )
             Text(
-                modifier = Modifier.padding(top = 4.dp, start = 4.dp, end = 4.dp),
+                modifier = Modifier.padding(top = 4.dp, start = 8.dp, end = 8.dp),
                 text = note.content,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                fontSize = 12.sp,
+                lineHeight = 14.sp,
                 color = Color.White
             )
 
             // Show subtasks
             displayedItems.forEach { item ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.wrapContentHeight(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Checkbox(
                         checked = item.isCompleted,
                         onCheckedChange = {}, enabled = false,
                         colors = CheckboxDefaults.colors(disabledUncheckedColor = Color.White)
                     )
-                    Text(text = item.subtaskName, color = Color.White)
+                    Text(
+                        text = item.subtaskName,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        lineHeight = 14.sp,
+                        textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                    )
                 }
             }
 
             // Show more subtasks if number is more than 3 elements
             if (note.subtasks.size > 3) {
-                Text(text = "+ ${note.subtasks.size - 3} more")
+                Text(
+                    text = "+ ${note.subtasks.size - 3} more",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Light,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
             }
 
             Text(

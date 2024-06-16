@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -28,6 +29,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -53,6 +55,7 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import com.jetbrains.kmpapp.domain.notes.models.CategoryModel
 import com.jetbrains.kmpapp.domain.notes.models.SubtaskModel
+import com.jetbrains.kmpapp.presentation.GoldenYellow
 import com.jetbrains.kmpapp.presentation.components.notes.AddCategoryModal
 import com.jetbrains.kmpapp.presentation.components.notes.ColorsRowList
 import com.jetbrains.kmpapp.presentation.viewmodels.notes.AddNoteViewModel
@@ -69,8 +72,17 @@ data class AddNoteScreen(
         var showCategoryDialog by remember { mutableStateOf(false) }
         val localNavigator = LocalNavigator.current
 
-        LaunchedEffect(Unit) {
+        LaunchedEffect(uiState.noteIsFavorite) {
             onActionsChange {
+                IconButton(onClick = {
+                    addNoteViewModel.toggleNoteAsFavorite()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Favorite note",
+                        tint = if (uiState.noteIsFavorite) GoldenYellow else LocalContentColor.current
+                    )
+                }
                 IconButton(onClick = {
                     addNoteViewModel.saveNote()
                 }) {

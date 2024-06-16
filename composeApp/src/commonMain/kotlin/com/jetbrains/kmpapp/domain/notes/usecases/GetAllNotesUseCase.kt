@@ -17,7 +17,8 @@ class GetAllNotesUseCase(
                 val subtasks = noteRepository.getSubtasksListForNote(it.id)
 
                 it.toDomain(category, subtasks)
-            }
+            }.sortedWith(compareByDescending<NoteModel> { it.isFavorite }
+                .thenByDescending { it.createdAt })
         }
     }
 
