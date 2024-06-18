@@ -17,4 +17,7 @@ interface SubtaskDao {
 
     @Query("SELECT * FROM subtasks_table WHERE noteId = :noteId")
     suspend fun getSubtasksListForNote(noteId: Int): List<SubtaskEntity>
+
+    @Query("DELETE FROM subtasks_table WHERE noteId = :noteId")
+    suspend fun deleteSubtasksForNote(noteId: Int)
 }

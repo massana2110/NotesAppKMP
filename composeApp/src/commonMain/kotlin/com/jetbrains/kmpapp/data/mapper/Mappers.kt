@@ -21,6 +21,16 @@ fun NoteModel.toNoteEntity() = NoteEntity(
     createdAt = createdAt.toInstant(TimeZone.currentSystemDefault()).toString()
 )
 
+fun NoteModel.toNoteEntityWithId() = NoteEntity(
+    id = noteId,
+    title = title,
+    content = content,
+    category = category.id,
+    color = color.value.toLong(),
+    isFavorite = isFavorite,
+    createdAt = createdAt.toInstant(TimeZone.currentSystemDefault()).toString()
+)
+
 fun NoteEntity.toDomain(categoryEntity: CategoryEntity, subtasks: List<SubtaskEntity>) = NoteModel(
     noteId = id,
     category = categoryEntity.toDomain(),
@@ -50,6 +60,13 @@ fun CategoryModel.toEntity() = CategoryEntity(
 )
 
 fun SubtaskModel.toEntity() = SubtaskEntity(
+    noteId = id,
+    subtaskName = subtaskName,
+    isCompleted = isCompleted
+)
+
+fun SubtaskModel.toEntityWithId() = SubtaskEntity(
+    id = id,
     noteId = id,
     subtaskName = subtaskName,
     isCompleted = isCompleted

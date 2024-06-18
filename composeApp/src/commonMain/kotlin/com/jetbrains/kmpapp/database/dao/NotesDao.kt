@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.jetbrains.kmpapp.database.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -22,4 +23,7 @@ interface NotesDao {
 
     @Query("SELECT * FROM notes_table WHERE id = :id")
     suspend fun getNoteById(id: Int): NoteEntity
+
+    @Update
+    suspend fun updateNote(note: NoteEntity)
 }

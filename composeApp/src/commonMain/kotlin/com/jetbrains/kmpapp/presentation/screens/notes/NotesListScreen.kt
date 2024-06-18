@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,10 +49,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
@@ -84,13 +86,8 @@ data class NotesListScreen(
 
         val searchState by viewModel.searchWidgetState
         val searchText by viewModel.searchText
-        val dropdownVisibility by viewModel.isDropdownVisible
-        val pressOffset by viewModel.pressOffset
         val filteredNotes = uiState.notesList.filter {
             it.title.contains(searchText, ignoreCase = true)
-        }
-        val interactionSource = remember {
-            MutableInteractionSource()
         }
 
         LaunchedEffect(Unit) {
@@ -129,7 +126,7 @@ data class NotesListScreen(
                         modifier = Modifier.fillMaxWidth()
                             .padding(horizontal = 8.dp),
                         value = searchText,
-                        onValueChange = { viewModel.onSearchTextChange(it) },
+                        onValueChange = { text -> viewModel.onSearchTextChange(text) },
                         label = { Text(text = "Search note") },
                         leadingIcon = {
                             Icon(
@@ -169,11 +166,15 @@ data class NotesListScreen(
                                 .animateItemPlacement(animationSpec = tween(600)),
                             note = note,
                             dropdownActions = listOf(
-                                if (note.isFavorite) DropdownItem.MARK_FAVORITE else DropdownItem.UNMARK_FAVORITE,
+                                if (!note.isFavorite) DropdownItem.MARK_FAVORITE else DropdownItem.UNMARK_FAVORITE,
                                 DropdownItem.DELETE
                             ),
-                            onActionClicked = { item, noteId ->
-                                // TODO: action to do
+                            onActionClicked = { item, noteModel ->
+                                when (item) {
+                                    DropdownItem.MARK_FAVORITE -> viewModel.toggleFavoriteNote(noteModel, true)
+                                    DropdownItem.UNMARK_FAVORITE -> viewModel.toggleFavoriteNote(noteModel, false)
+                                    DropdownItem.DELETE -> viewModel.deleteNote(noteModel)
+                                }
                             },
                         )
                     }
@@ -187,18 +188,28 @@ data class NotesListScreen(
         modifier: Modifier = Modifier,
         note: NoteModel,
         dropdownActions: List<DropdownItem>,
-        onActionClicked: (DropdownItem, Int) -> Unit,
+        onActionClicked: (DropdownItem, NoteModel) -> Unit,
     ) {
         var isDropdownVisible by remember {
             mutableStateOf(false)
         }
 
+        var pressOffset by remember {
+            mutableStateOf(DpOffset.Zero)
+        }
+        var itemHeight by remember {
+            mutableStateOf(0.dp)
+        }
+        val density = LocalDensity.current
+
         Card(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().pointerInput(true) {
+            modifier = modifier.fillMaxWidth().wrapContentHeight().onSizeChanged {
+                itemHeight = with(density) { it.height.toDp() }
+            }.pointerInput(true) {
                 detectTapGestures(
                     onTap = {},
                     onLongPress = {
-                        val offset = androidx.compose.ui.unit.DpOffset(it.x.toDp(), it.y.toDp())
+                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
                         isDropdownVisible = true
                     }
                 )
@@ -293,11 +304,14 @@ data class NotesListScreen(
             DropdownMenu(
                 expanded = isDropdownVisible,
                 onDismissRequest = { isDropdownVisible = false },
+                offset = pressOffset.copy(
+                    y = pressOffset.y - itemHeight
+                )
             ) {
                 dropdownActions.forEach {
                     DropdownMenuItem(
                         onClick = {
-                            onActionClicked(it, note.noteId)
+                            onActionClicked(it, note)
                             isDropdownVisible = false
                         },
                         text = { Text(text = it.itemName) }

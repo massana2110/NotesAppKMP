@@ -44,4 +44,25 @@ class NoteRepository(
             Result.failure(e)
         }
     }
+
+    // UPDATE Operations
+    suspend fun updateNote(note: NoteEntity): Result<Unit> {
+        return try {
+            notesDao.updateNote(note)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // DELETE operations
+    suspend fun deleteNoteWithSubtasks(note: NoteEntity, subtasks: List<SubtaskEntity>): Result<Unit> {
+        return try {
+            subtaskDao.deleteSubtasksForNote(note.id)
+            notesDao.delete(note)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
