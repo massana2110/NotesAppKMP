@@ -124,7 +124,7 @@ data class AddNoteScreen(
                         fontSize = 14.sp,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                         Button(onClick = { localNavigator?.pop() }) {
                             Text("Go back")
                         }

@@ -38,7 +38,7 @@ fun AddCategoryModal(
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Card(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(8.dp),
