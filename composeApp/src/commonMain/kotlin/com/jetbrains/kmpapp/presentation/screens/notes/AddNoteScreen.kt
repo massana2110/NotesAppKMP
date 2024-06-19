@@ -221,6 +221,7 @@ data class AddNoteScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = "Category", fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -229,7 +230,7 @@ data class AddNoteScreen(
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add category")
                 }
                 if (uiState.categories.isNotEmpty()) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         repeat(uiState.categories.size) {
                             Box(
                                 modifier = Modifier.border(

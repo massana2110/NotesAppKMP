@@ -9,9 +9,7 @@ It includes shared business logic and data handling, and a shared UI implementat
 
 The app uses the following multiplatform dependencies in its implementation:
 
-- [Compose Multiplatform](https://jb.gg/compose) for UI
-- [Ktor](https://ktor.io/) for networking
-- [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) for JSON handling
-- [Kamel](https://github.com/Kamel-Media/Kamel) for image loading
+- [Compose Multiplatform](https://jb.gg/compose) for shared UI between platforms
 - [Koin](https://github.com/InsertKoinIO/koin) for dependency injection
 - [Voyager](https://github.com/adrielcafe/voyager) for navigation and screen models
+- [Room](https://developer.android.com/jetpack/androidx/releases/room) for persistence data
